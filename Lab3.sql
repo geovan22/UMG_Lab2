@@ -1,10 +1,13 @@
-Create DataBase Lab3;
-use Lab3;
+--* INCISO  1
+CREATE DATABASE Lab3;
+USE Lab3;
 
-select * From sys.database_principals
+select * From sys.database_principals;
 
-Create SCHEMA LabUMG;
+--* INCISO  2
+CREATE SCHEMA LabUMG;
 
+--* INCISO  3
 CREATE TABLE LabUMG.DB_Usuario (
   idDB_Usuario int IDENTITY (1,1) NOT NULL,
   Nombre1 VARCHAR(50) NULL,
@@ -18,32 +21,75 @@ CREATE TABLE LabUMG.DB_Usuario (
   PRIMARY KEY(idDB_Usuario)
 );
 
-Create View LabUMG.ReporteUsuario
-as
-Select idDB_Usuario as id, Nombre1 as Nombre, Apellido1 as Apellido
-From LabUMG.DB_Usuario
+CREATE VIEW LabUMG.ReporteUsuario
+AS
+SELECT idDB_Usuario as id, Nombre1 as Nombre, Apellido1 as Apellido
+FROM LabUMG.DB_Usuario
 
-insert into LabUMG.DB_Usuario
+--* INCISO  4
+INSERT INTO LabUMG.DB_Usuario
 		(Nombre1,Nombre2,Nombre3, Apellido1, Apellido2, Edad, FechaNac,Pass)
-Values 
+VALUES 
 		('Lilian','Lorena', ' ','Garcia', 'Mancilla',37, '1984-07-27','1315lg'),
 		('Silvian','Lorena', ' ' ,'Almedares', 'Garcia',31, '1987-08-27','1315lg');
 
-Select * From LabUMG.ReporteUsuario;
+EXECUTE AS USER = 'Test';
+SELECT * FROM LabUMG.ReporteUsuario;
 
-Create login PreubasDesarrollo
-With Password = 'PD1315';
+--* INCISO  5
+CREATE LOGIN PreubasDesarrollo
+WITH PASSWORD = 'PD1315';
 
-Use Lab3;
+USE Lab3;
 
-Create User Test For Login PreubasDesarrollo
-With Default_Schema = LabUMG;
+--* CREACIÓN DE USER PARA DARLE PERMISOS
+CREATE USER Test FOR LOGIN PreubasDesarrollo
+WITH Default_Schema = LabUMG;
 
-Grant Select
-On Schema:: LabUMG
-To Test
-With Grant Option
-Go
+--* INCISO  6
+GRANT SELECT
+ON SCHEMA:: LabUMG
+TO Test
+WITH GRANT OPTION
+GO
 
-Grant insert On Object:: LabUMG.DB_Usuario
-To Test
+--* INCISO  7
+GRANT INSERT ON OBJECT:: LabUMG.DB_Usuario
+TO Test
+
+--* INCISO  8
+REVOKE INSERT ON OBJECT:: LabUMG.DB_Usuario
+TO Test
+
+--* INCISO  9
+REVOKE SELECT ON SCHEMA:: LabUMG
+TO Test
+CASCADE
+
+--* INCISO  10
+DROP TABLE LabUMG.DB_Usuario;
+DROP VIEW LabUMG.ReporteUsuario;
+DROP SCHEMA LabUMG;
+
+--* INCISO  11
+DROP DATABASE Lab3;
+
+--* INCISO  12
+CREATE TABLE LabUMG.Bitacora_Logon (
+  ID_Bitacora_Logon int IDENTITY (1,1) NOT NULL,
+  EventData xml,
+  PostDtm datetime
+  PRIMARY KEY(ID_Bitacora_Logon)
+)
+
+CREATE TRIGGER LogonEvents
+ON ALL SERVER
+FOR LOGON
+AS
+BEGIN
+	INSERT INTO LabUMG.Bitacora_Logon
+	SELECT EVENTDATA(),GETDATE();
+END
+GO
+
+SELECT * FROM LabUMG.Bitacora_Logon;
